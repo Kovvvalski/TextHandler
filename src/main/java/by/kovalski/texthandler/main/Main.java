@@ -1,6 +1,8 @@
 package by.kovalski.texthandler.main;
 
 import by.kovalski.texthandler.entity.ComponentType;
+import by.kovalski.texthandler.entity.SymbolLeaf;
+import by.kovalski.texthandler.entity.TextComposite;
 import by.kovalski.texthandler.parser.AbstractHandler;
 import by.kovalski.texthandler.parser.TextHandler;
 import by.kovalski.texthandler.entity.TextComponent;
@@ -26,9 +28,9 @@ public class Main {
     AbstractHandler handler = new TextHandler();
     TextComponent component = handler.handleRequest(text);
     TextHandlerService service = new TextHandlerServiceImpl();
-    System.out.println(service.countNumberOfVowelAndConsonantLetters(component));
     Map<TextComponent, Integer> map = service.findEqualsWords(component);
-    List<TextComponent> components = service.sentencesWithWordsMoreThan(component, 2);
-    System.out.println();
+    service.sortParagraphs(component);
+    System.out.println(service.countNumberOfVowelAndConsonantLetters(component));
+    System.out.println(component);
   }
 }

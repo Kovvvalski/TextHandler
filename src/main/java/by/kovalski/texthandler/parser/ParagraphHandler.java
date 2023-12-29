@@ -8,7 +8,7 @@ import by.kovalski.texthandler.entity.SymbolLeaf;
 import java.util.ArrayList;
 
 public class ParagraphHandler extends AbstractHandler {
-  static public final String SENTENCE_DELIMITER_REGEX = "[….!?]( |$)";
+  public static final String SENTENCE_DELIMITER_REGEX = "[….!?]( |$)";
   private static final AbstractHandler handler = new SentenceHandler();
 
   @Override

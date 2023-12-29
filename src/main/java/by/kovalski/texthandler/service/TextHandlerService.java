@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface TextHandlerService {
-  List<TextComponent> sortParagraphs(TextComponent component) throws TextHandlerException;
+  void sortParagraphs(TextComponent component) throws TextHandlerException;
 
   List<TextComponent> sentencesWithTheBiggestWord(TextComponent component) throws TextHandlerException;
 
@@ -21,5 +21,5 @@ public interface TextHandlerService {
 
   Map<TextComponent, Integer> findEqualsWords(TextComponent component) throws TextHandlerException;
 
-  List<TextComponent> sentencesWithWordsMoreThan(TextComponent component, int number) throws TextHandlerException;
+  void deleteSentencesWithWordsLessThan(TextComponent component, int number) throws TextHandlerException;
 }

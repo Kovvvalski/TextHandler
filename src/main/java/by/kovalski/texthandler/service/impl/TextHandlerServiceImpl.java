@@ -17,16 +17,29 @@ import java.util.Map;
 
 public class TextHandlerServiceImpl implements TextHandlerService {
   private static final Logger logger = LogManager.getLogger();
+  public static final String SENTENCE_DELIMITER_REGEX = "[….!?]( |$)";
+  private static final char SPACE = ' ';
 
   @Override
-  public List<TextComponent> sortParagraphs(TextComponent component) throws TextHandlerException {
+  public void sortParagraphs(TextComponent component) throws TextHandlerException {
     if (component.getType() != ComponentType.TEXT) {
       logger.error("Not correct type of component");
       throw new TextHandlerException("Not correct type of component");
     }
     List<TextComponent> paragraphs = new ArrayList<>(((TextComposite) component).getChildren().stream().filter(o -> o.getType() == ComponentType.PARAGRAPH).toList());
     paragraphs.sort((o1, o2) -> getSentencesNumber(o1) - getSentencesNumber(o2));
-    return paragraphs;
+    List<TextComponent> newChildren = new ArrayList<>();
+
+    for (int i = 0; i < paragraphs.size(); i++) {
+      if (i != 0) {
+        newChildren.add(new SymbolLeaf('\n', ComponentType.PUNCTUATION_MARK));
+      }
+      for (int j = 0; j < 4; j++) {//adding tabulation
+        newChildren.add(new SymbolLeaf(SPACE, ComponentType.PUNCTUATION_MARK));
+      }
+      newChildren.add(paragraphs.get(i));
+    }
+    ((TextComposite) component).setChildren(newChildren);
   }
 
   @Override
@@ -79,7 +92,7 @@ public class TextHandlerServiceImpl implements TextHandlerService {
     int consonantCounter = 0;
 
     for (TextComponent letter : letters) {
-      Character character = ((SymbolLeaf) letter).getSymbol();
+      Character character = Character.toLowerCase(((SymbolLeaf) letter).getSymbol());
       if (Alphabet.VOWEL_ENG.getLetters().contains(character) || Alphabet.VOWEL_RUS.getLetters().contains(character)) {
         vowelCounter++;
       } else if (Alphabet.CONSONANT_ENG.getLetters().contains(character) || Alphabet.CONSONANT_RUS.getLetters().contains(character)) {
@@ -108,12 +121,16 @@ public class TextHandlerServiceImpl implements TextHandlerService {
 
     Map<TextComponent, Integer> out = new HashMap<>();
     for (TextComponent word1 : words) {
+      TextComposite word1WithoutReg = new TextComposite(new ArrayList<>(), ComponentType.WORD);
+      for (TextComponent letter : ((TextComposite) word1).getChildren()) {
+        word1WithoutReg.add(new SymbolLeaf(Character.toLowerCase(((SymbolLeaf) letter).getSymbol()), ComponentType.LETTER));
+      }
+      if (out.containsKey(word1WithoutReg)) {
+        continue;
+      }
       for (TextComponent word2 : words) {
         if (word1 != word2) {
-          TextComposite word1WithoutReg = new TextComposite(new ArrayList<>(), ComponentType.WORD);
-          for (TextComponent letter : ((TextComposite) word1).getChildren()) {
-            word1WithoutReg.add(new SymbolLeaf(Character.toLowerCase(((SymbolLeaf) letter).getSymbol()), ComponentType.LETTER));
-          }
+
           TextComposite word2WithoutReg = new TextComposite(new ArrayList<>(), ComponentType.WORD);
           for (TextComponent letter : ((TextComposite) word2).getChildren()) {
             word2WithoutReg.add(new SymbolLeaf(Character.toLowerCase(((SymbolLeaf) letter).getSymbol()), ComponentType.LETTER));
@@ -134,18 +151,27 @@ public class TextHandlerServiceImpl implements TextHandlerService {
   }
 
   @Override
-  public List<TextComponent> sentencesWithWordsMoreThan(TextComponent component, int number) throws TextHandlerException {
+  public void deleteSentencesWithWordsLessThan(TextComponent component, int number) throws TextHandlerException {
     if (component.getType() != ComponentType.TEXT) {
       logger.error("Not correct type of component");
       throw new TextHandlerException("Not correct type of component");
     }
     TextComposite text = (TextComposite) component;
     List<TextComponent> paragraphs = text.getChildren().stream().filter(o -> o.getType() == ComponentType.PARAGRAPH).toList();
-    List<TextComponent> sentences = new ArrayList<>();
     for (TextComponent paragraph : paragraphs) {
-      sentences.addAll(((TextComposite) paragraph).getChildren().stream().filter(o -> o.getType() == ComponentType.SENTENCE).toList());
+      List<TextComponent> children = ((TextComposite) paragraph).getChildren();
+      for (int i = 0; i < children.size(); i++) {
+        if (children.get(i).getType() == ComponentType.SENTENCE && getWordsNumber(children.get(i)) < number) {
+          children.remove(i);
+          children.remove(i);
+          if (!children.isEmpty()) {
+            children.remove(i);
+            i--;
+          }
+        }
+      }
+      ((TextComposite) paragraph).setChildren(children);
     }
-    return sentences.stream().filter(o -> ((TextComposite) o).getChildren().stream().filter(o1 -> o1.getType() == ComponentType.WORD).toList().size() >= number).toList();
   }
 
   private int lengthOfTheBiggestWordInSentence(TextComponent component) {
@@ -170,6 +196,15 @@ public class TextHandlerServiceImpl implements TextHandlerService {
       throw new UnsupportedOperationException("Not correct type of component");
     }
     return ((TextComposite) component).getChildren().stream().filter(o -> o.getType() == ComponentType.SENTENCE).toList().size();
+  }
+
+  private int getWordsNumber(TextComponent component) {
+    if (component.getClass() != TextComposite.class || ((TextComposite) component).getType() != ComponentType.SENTENCE) {
+      logger.error("Not correct type of component");
+      throw new UnsupportedOperationException("Not correct type of component");
+    }
+    TextComposite sentence = (TextComposite) component;
+    return sentence.getChildren().stream().filter(o -> o.getType() == ComponentType.WORD).toList().size();
   }
 
 }
