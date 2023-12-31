@@ -20,7 +20,7 @@ public enum ComponentType {
       throw new UnsupportedOperationException("This operation is unsupported yet");
     }
   },
-  WORD("(?=[, \\-\\(\\)\\\"\\\"=\\n])|(?<=[, \\-\\(\\)\\\"\\\"=\\n])") {
+  WORD("(?=[, \\-\\(\\)\\\"\\\"=*+\\/\n])|(?<=[, \\-\\(\\)\\\"\\\"=*+\\/\n])") {
     @Override
     public boolean equals(TextComponent component1, TextComponent component2) {
       if (component1.getType() != WORD || component2.getType() != WORD) {

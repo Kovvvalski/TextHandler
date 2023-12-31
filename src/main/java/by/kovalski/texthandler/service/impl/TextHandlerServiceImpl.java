@@ -130,7 +130,6 @@ public class TextHandlerServiceImpl implements TextHandlerService {
       }
       for (TextComponent word2 : words) {
         if (word1 != word2) {
-
           TextComposite word2WithoutReg = new TextComposite(new ArrayList<>(), ComponentType.WORD);
           for (TextComponent letter : ((TextComposite) word2).getChildren()) {
             word2WithoutReg.add(new SymbolLeaf(Character.toLowerCase(((SymbolLeaf) letter).getSymbol()), ComponentType.LETTER));
@@ -138,7 +137,6 @@ public class TextHandlerServiceImpl implements TextHandlerService {
           if (word1WithoutReg.equals(word2WithoutReg)) {
             if (out.containsKey(word1WithoutReg)) {
               int value = out.get(word1WithoutReg);
-              out.remove(word1WithoutReg);
               out.put(word1WithoutReg, ++value);
             } else {
               out.put(word1WithoutReg, 2);

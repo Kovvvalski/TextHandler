@@ -8,7 +8,7 @@ import by.kovalski.texthandler.entity.SymbolLeaf;
 import java.util.ArrayList;
 
 public class SentenceHandler extends AbstractHandler {
-  private static final String WORD_DELIMITER_REGEX = "[, \\-\\(\\)\\\"\\\"=\n]";
+  private static final String WORD_DELIMITER_REGEX = "[, \\-\\(\\)\\\"\\\"=*+\\/\n]";
   private static AbstractHandler handler = new WordHandler();
 
   @Override
